@@ -1,0 +1,14 @@
+---
+
+
+- hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Create Elastic Beanstock
+      aws_elasticbeanstalk_app:
+        app_name: skodaice
+        description: "skoda ice web app"
+        region: us-east-1
+        state: present
