@@ -1,0 +1,17 @@
+---
+# USAGE: ansible-playbook deploy-playbook.yaml -e "deployment_environment=development"
+# TEST USAGE: ansible-playbook test-playbook.yaml -e "deployment_environment=development"
+# POSSIBLE STATE VARS
+#   - network_state
+
+- hosts: localhost
+  gather_facts: yes
+
+  tasks:
+    - name: "Import the values file for the {{ deployment_environment }} environment"
+      include_vars: 
+        file: "/opt/ansible/environments/{{ deployment_environment }}/valules.yaml"
+
+    - name: "Deploy Infrastructure"
+      include_role: 
+        name: infrastructure

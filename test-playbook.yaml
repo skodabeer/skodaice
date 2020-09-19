@@ -1,5 +1,8 @@
 ---
 # USAGE: ansible-playbook test-playbook.yaml -e "deployment_environment=development"
+# TESTING - Add clean_up=true to clean up your resources
+# POSSIBLE STATE VARS
+#   - network_state
 
 - hosts: localhost
   gather_facts: yes
@@ -12,3 +15,14 @@
     - name: "Deploy Infrastructure"
       include_role: 
         name: infrastructure
+
+
+
+    #-----------CLEAN UP IF CLEAN UP TRUE---------------------
+
+    - name: "Deploy Infrastructure"
+      include_role: 
+        name: infrastructure
+      vars:
+        network_state: absent
+      when: clean_up == "true"
