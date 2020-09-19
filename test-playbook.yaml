@@ -1,7 +1,8 @@
 ---
-# USAGE: ansible-playbook test-playbook.yaml -e "deployment_environment=development"
+# USAGE: ansible-playbook deploy-playbook.yaml -e "deployment_environment=development"
 # TESTING - Add clean_up=true to clean up your resources
-# POSSIBLE STATE VARS
+#### USAGE: ansible-playbook test-playbook.yaml -e "deployment_environment=development"
+#### POSSIBLE STATE VARS
 #   - network_state
 
 - hosts: localhost
