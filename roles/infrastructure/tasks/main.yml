@@ -1,0 +1,5 @@
+---
+
+
+- name: "Deploy vpc and network"
+  include_tasks: network.yaml
