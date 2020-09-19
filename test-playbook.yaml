@@ -1,6 +1,6 @@
 ---
 # USAGE: ansible-playbook deploy-playbook.yaml -e "deployment_environment=development"
-# TESTING - Add clean_up=true to clean up your resources
+# TESTING - Add testing=true to clean up your resources
 #### USAGE: ansible-playbook test-playbook.yaml -e "deployment_environment=development"
 #### POSSIBLE STATE VARS
 #   - network_state
@@ -11,7 +11,7 @@
   tasks:
     - name: "Import the values file for the {{ deployment_environment }} environment"
       include_vars: 
-        file: "/opt/ansible/environments/{{ deployment_environment }}/valules.yaml"
+        file: "/opt/ansible/environments/{{ deployment_environment }}/values.yaml"
 
     - name: "Deploy Infrastructure"
       include_role: 
@@ -21,9 +21,9 @@
 
     #-----------CLEAN UP IF CLEAN UP TRUE---------------------
 
-    - name: "Deploy Infrastructure"
+    - name: "Destroy Infrastructure"
       include_role: 
         name: infrastructure
       vars:
         network_state: absent
-      when: clean_up == "true"
+      when: testing == "true"
