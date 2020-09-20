@@ -9,3 +9,25 @@
     tags: "{{ values.vpc.tags }}"
     tenancy: "{{ values.vpc.tenancy }}"
   register: vpc_results
+
+- name: "Create database subnet"
+  ec2_vpc_subnet:
+    cidr: "{{ values.subnets.database.cidr }}"
+    region:  "{{ values.subnets.database.region }}"
+    state: "{{ network_state | default('present') }}"
+    tags: "{{ values.subnets.database.tags }}"
+    vpc_id: "{{ vpc_results.vpc.id }}"
+  register: database_subnet
+
+- name: "Create Security Group"
+  ec2_group:
+    description: "{{ values.nsgs.admin_home.description }}"
+    name: "{{ values.nsgs.admin_home.name }}"
+    purge_rules: true
+    purge_rules_egress: true
+    purge_tags: true
+    region: "{{ values.nsgs.admin_home.region }}"
+    rules: "{{ values.nsgs.admin_home.rules }}"
+    state: "{{ network_state | default('present') }}"
+    tags: "{{ values.nsgs.admin_home.tags }}"
+    vpc_id: "{{ vpc_results.vpc.id }}"
