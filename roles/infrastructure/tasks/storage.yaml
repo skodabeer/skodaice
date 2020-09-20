@@ -1,0 +1,7 @@
+--- 
+
+- name: "Create a storage bucket"
+  aws_s3:
+    bucket: "{{ values.s3.artifacts.name }}"
+    mode: "{{ values.s3.artifacts.mode }}"
+    permission: "{{ values.s3.artifacts.permission }}"

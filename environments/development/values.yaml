@@ -1,11 +1,15 @@
 
+
+global_values:
+  region: "us-east-2"
+
 values:
   vpc:
     cidr_block: 
       - "10.0.0.0/28"
       - "172.2.0.0/24"
     name: "skodaice_vpc"
-    region: "us-east-2"
+    region: "{{ global_values.region }}"
     tags:
       deployment_language: "ansible"
       purpose: "website" 
@@ -14,7 +18,7 @@ values:
   subnets:
     database:
       cidr: "172.2.0.0/24"
-      region: "us-east-2"
+      region: "{{ global_values.region }}"
       tags:
         deployment_language: "ansible"
         name: database_subnet
@@ -24,7 +28,7 @@ values:
     admin_home:
       name: "admin_home_access"
       description: "Allow the admin access from home"
-      region: "us-east-2"
+      region: "{{ global_values.region }}"
       rules:
         - proto: tcp
           from_port: 80
@@ -46,4 +50,10 @@ values:
         deployment_language: "ansible"
         name: database_subnet
         purpose: "database"
+
+  s3:
+    artifacts:
+      name: skodaice-artifacts
+      mode: create
+      permission: private
         

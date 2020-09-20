@@ -3,3 +3,6 @@
 
 - name: "Deploy vpc and network"
   include_tasks: network.yaml
+
+- name: "Deploy storage"
+  include_tasks: storage.yaml
