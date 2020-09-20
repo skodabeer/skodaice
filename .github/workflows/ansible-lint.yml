@@ -16,7 +16,7 @@ jobs:
       uses: ansible/ansible-lint-action@master
       with:
         targets: |
-          - test_playbook.yaml
+          - test-playbook.yaml
           - roles
         # [optional]
         # Arguments to override a package and its version to be set explicitly.
