@@ -5,3 +5,9 @@
     bucket: "{{ values.s3.artifacts.name }}"
     mode: "{{ values.s3.artifacts.mode }}"
     permission: "{{ values.s3.artifacts.permission }}"
+  register: storage_results
+
+- name: Debug storage at v 1
+  debug:
+    var: storage_results
+    verbosity: 1

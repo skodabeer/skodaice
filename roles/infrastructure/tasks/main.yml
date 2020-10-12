@@ -6,3 +6,9 @@
 
 - name: "Deploy storage"
   include_tasks: storage.yaml
+
+- name: "Deploy security"
+  include_tasks: security.yaml
+
+- name: "Deploy compute"
+  include_tasks: compute.yaml

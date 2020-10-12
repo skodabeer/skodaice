@@ -4,30 +4,58 @@
   ec2_vpc_net:
     name: "{{ values.vpc.name }}"
     cidr_block: "{{ values.vpc.cidr_block }}"
-    region: "{{ values.vpc.region }}"
+    region: "{{ global_values.region }}"
     state: "{{ network_state | default('present') }}"
     tags: "{{ values.vpc.tags }}"
     tenancy: "{{ values.vpc.tenancy }}"
   register: vpc_results
 
-- name: "Create database subnet"
+- name: Debug vpc at v 1
+  debug:
+    var: vpc_results
+    verbosity: 1
+
+- name: "Create subnets"
   ec2_vpc_subnet:
-    cidr: "{{ values.subnets.database.cidr }}"
-    region:  "{{ values.subnets.database.region }}"
+    cidr: "{{ item.cidr }}"
+    region:  "{{ global_values.region }}"
     state: "{{ network_state | default('present') }}"
-    tags: "{{ values.subnets.database.tags }}"
+    tags: "{{ item.tags }}"
     vpc_id: "{{ vpc_results.vpc.id }}"
-  register: database_subnet
+  with_items: "{{ values.subnets }}"
+  register: subnet_results
+
+- name: Debug subnet at v 1
+  debug:
+    var: subnet_results
+    verbosity: 1
 
 - name: "Create Security Group"
   ec2_group:
-    description: "{{ values.nsgs.admin_home.description }}"
-    name: "{{ values.nsgs.admin_home.name }}"
+    description: "{{ item.description }}"
+    name: "{{ item.name }}"
     purge_rules: true
     purge_rules_egress: true
     purge_tags: true
-    region: "{{ values.nsgs.admin_home.region }}"
-    rules: "{{ values.nsgs.admin_home.rules }}"
+    region: "{{ global_values.region }}"
+    rules: "{{ item.rules }}"
     state: "{{ network_state | default('present') }}"
-    tags: "{{ values.nsgs.admin_home.tags }}"
+    tags: "{{ item.tags }}"
     vpc_id: "{{ vpc_results.vpc.id }}"
+  with_items: "{{ values.nsgs }}"
+  register: nsg_results
+
+- name: Debug nsg at v 1
+  debug:
+    var: nsg_results
+    verbosity: 1
+
+- name: "Create internet gateway"
+  ec2_vpc_igw:
+    vpc_id: "{{ vpc_results.vpc.id }}"
+    region: "{{ global_values.region }}"
+    state: present
+  register: igw_results
+
+#TODO associate the igw to the route table to make the web subnet public
+    

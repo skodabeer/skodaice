@@ -7,6 +7,8 @@
 
 - hosts: localhost
   gather_facts: yes
+  vars:
+    testing: "false"
 
   tasks:
     - name: "Import the values file for the {{ deployment_environment }} environment"

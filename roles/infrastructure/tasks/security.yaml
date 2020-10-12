@@ -1,0 +1,51 @@
+---
+
+
+- name: Create a new ec2 key pair, returns generated private key
+  ec2_key:
+    name: skodaice_key
+    region: us-east-2
+  register: key_result
+
+- name: "Ensure ssh directory is present"
+  file:
+      path: /root/.ssh/
+      state: directory
+
+- name: "Copy the private key so we can ssh to the box later"
+  copy: 
+    content: "{{ key_result.key.private_key }}" 
+    dest: /root/.ssh/skodaice_key.pem
+  when: key_result.key.private_key is defined
+
+# - name: Create IAM policies
+#   iam_policy:
+#     iam_type: "{{ item.iam_type }}"
+#     iam_name: "{{ item.iam_name }}"
+#     policy_name: "{{ item.policy_name }}"
+#     state: "{{ item.state | default('present') }}"
+#     policy_document: "{{ item.policy_document }}"
+#     skip_duplicates: "{{ item.skip_duplicates }}"
+#   with_items: "{{ values.iam_policies }}"
+#   register: iam_policy_results
+
+# - name: Debug iam_policies at v 1
+#   debug:
+#     var: iam_policy_results
+#     verbosity: 1
+
+# - name: Create IAM roles
+#   iam_role:
+#     assume_role_policy_document: "{{ item.assume_role_policy_document }}"
+#     description: "{{ item.description }}"
+#     managed_policy: "{{ iam_policy_results.id }}"
+#     name: "{{ item.name }}"
+#     region: "{{ item.region }}"
+#     state: "{{ item_state | default('present') }}"
+#   with_items: "{{ values.iam_roles }}"
+#   register: iam_role_results
+
+# - name: Debug iam_roles at v 1
+#   debug:
+#     var: iam_role_results
+#     verbosity: 1

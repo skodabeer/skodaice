@@ -11,6 +11,7 @@ RUN apt update && \
     apt install -y software-properties-common && \
     apt-add-repository -y --update ppa:ansible/ansible && \
     apt-get -y install python3-pip && \
+    pip3 install boto && \
     pip3 install boto3 && \
     pip3 install botocore &&\
     pip3 install ansible

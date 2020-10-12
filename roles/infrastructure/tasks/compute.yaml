@@ -1,0 +1,63 @@
+---
+
+
+- name: "Find the webserver nsg"
+  ec2_group_info:
+    filters:
+      group-name: 
+        - "webserver"
+    region: "{{ global_values.region }}"
+  register: nsg_group_result 
+
+- name: "Get subnet info"
+  ec2_vpc_subnet_info:
+    filters:
+      "tag:name": "web_subnet"
+    region: "{{ global_values.region }}"
+  register: subnet_result
+
+- name: "Deploy ec2 instance as temp web host"
+  ec2:
+    assign_public_ip: yes
+    ebs_optimized: false
+    group_id: "{{ nsg_group_result.security_groups[0].group_id }}"
+    instance_initiated_shutdown_behavior: stop
+    image: "{{ values.ec2.webserver.ami }}"
+    instance_type: "{{ values.ec2.webserver.instance_type }}"
+    key_name: skodaice_key
+    region: "{{ values.ec2.webserver.region }}"
+    state: "{{ compute_state | default('present') }}"
+    tenancy: default
+    validate_certs: no
+    vpc_subnet_id: "{{ subnet_result.subnets[0].subnet_id }}"
+    wait: true
+    wait_timeout: 600
+  register: ec2_results
+
+- name: Debug ec2 at v 1
+  debug:
+    var: ec2_results
+    verbosity: 1
+
+- name: "Create an ELB for http requests"
+  local_action:
+    listeners: "{{ values.elbs.application.listeners }}"
+    module: ec2_elb_lb
+    name: "{{ values.elbs.application.name }}"
+    region: "{{ global_values.region }}"
+    state: "{{ network_state | default('present') }}"
+    subnets: "{{ subnet_results.results[0].subnet.id }}"
+    tags: "{{ values.elbs.application.tags }}"
+  register: elb_results
+
+- name: Debug elb at v 1
+  debug:
+    var: elb_results
+    verbosity: 1
+
+- name: Add instnace to elb
+  ec2_elb:
+    instance_id: "{{ ec2_results.instances[0].id }}"
+    ec2_elbs: "{{ elb_results.elb.name }}"
+    region: "{{ global_values.region }}"
+    state: present

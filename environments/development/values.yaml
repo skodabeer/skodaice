@@ -4,29 +4,51 @@ global_values:
   region: "us-east-2"
 
 values:
-  vpc:
-    cidr_block: 
-      - "10.0.0.0/28"
-      - "172.2.0.0/24"
-    name: "skodaice_vpc"
-    region: "{{ global_values.region }}"
-    tags:
-      deployment_language: "ansible"
-      purpose: "website" 
-    tenancy: default
-
-  subnets:
-    database:
-      cidr: "172.2.0.0/24"
+  ec2:
+    webserver:
+      ami: ami-03657b56516ab7912
+      az: us-east-2-a
+      instance_type: t2.micro
+      name: skodaice-temp-web-server
       region: "{{ global_values.region }}"
       tags:
         deployment_language: "ansible"
-        name: database_subnet
-        purpose: "database"
+        name: webserver
+        purpose: "any"
+
+  elbs:
+    application:
+      listeners:
+        - protocol: http
+          load_balancer_port: 80
+          instance_port: 80
+      name: "http-elb"
+      subnets:
+
+      tags:
+        deployment_language: "ansible"
+        name: "http-elb"
+        purpose: "http web load balancer"
+
+  iam_policies:
+    - web_server:
+      iam_type: role
+      iam_name: ec2
+      policy_document: "{{ role_path }}/files/policy.json"
+      policy_name: webserver_policy
+      skip_duplicates: false
+      state: "{{ iam_web_server_state | default('present') }}"
+
+  iam_roles:
+    - web_server:
+      assume_role_policy_document: "{{ role_path }}/files/policy_assume_role.json"
+      description: "This is a role for ec2 instances"
+      name: "web-server-role"
+      region: "{{ global_values.region }}"
+      state: "{{ iam_web_server_state | default('present') }}"
 
   nsgs:
-    admin_home:
-      name: "admin_home_access"
+    - name: "admin_home_access"
       description: "Allow the admin access from home"
       region: "{{ global_values.region }}"
       rules:
@@ -51,9 +73,49 @@ values:
         name: database_subnet
         purpose: "database"
 
+    - name: "webserver"
+      description: "Allow the admin access to and from any"
+      region: "{{ global_values.region }}"
+      rules:
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: "0.0.0.0/0"
+      tags:
+        deployment_language: "ansible"
+        name: webserver
+        purpose: "any"
+
   s3:
     artifacts:
       name: skodaice-artifacts
       mode: create
       permission: private
+
+  subnets:
+    - cidr: "10.0.0.0/28"
+      name: web
+      region: "{{ global_values.region }}"
+      tags:
+        deployment_language: "ansible"
+        name: web_subnet
+        purpose: "web"
+    - cidr: "172.2.0.0/24"
+      name: database
+      region: "{{ global_values.region }}"
+      tags:
+        deployment_language: "ansible"
+        name: database_subnet
+        purpose: "database"
+
+  vpc:
+    cidr_block: 
+      - "10.0.0.0/28"
+      - "172.2.0.0/24"
+    name: "skodaice_vpc"
+    region: "{{ global_values.region }}"
+    tags:
+      deployment_language: "ansible"
+      purpose: "website" 
+    tenancy: default
         

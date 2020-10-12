@@ -1,0 +1,14 @@
+{
+    "Version": "2012-10-17",
+    "Id": "webserver-permissions",
+    "Statement": [{
+      "Sid": "1",
+      "Effect": "Allow",
+      "Principal": {"AWS": ["arn:aws:iam::211533725355:root"]},
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::skodaice-artifacts",
+        "arn:aws:s3:::skodaice-artifacts/*"
+      ]
+    }]
+}
