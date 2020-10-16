@@ -12,7 +12,7 @@
 - name: "Get subnet info"
   ec2_vpc_subnet_info:
     filters:
-      "tag:name": "web_subnet"
+      "tag:name": "public"
     region: "{{ global_values.region }}"
   register: subnet_result
 
@@ -29,7 +29,7 @@
     state: "{{ compute_state | default('present') }}"
     tenancy: default
     validate_certs: no
-    vpc_subnet_id: "{{ subnet_result.subnets[0].subnet_id }}"
+    vpc_subnet_id: "{{ subnet_result.subnets[0].id }}"
     wait: true
     wait_timeout: 600
   register: ec2_results
