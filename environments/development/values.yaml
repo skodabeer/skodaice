@@ -94,19 +94,20 @@ values:
 
   subnets:
     - cidr: "10.0.0.0/28"
-      name: web
+      name: public
       region: "{{ global_values.region }}"
       tags:
         deployment_language: "ansible"
-        name: web_subnet
-        purpose: "web"
+        name: public
+        purpose: "public_facing"
+        
     - cidr: "172.2.0.0/24"
-      name: database
+      name: private
       region: "{{ global_values.region }}"
       tags:
         deployment_language: "ansible"
-        name: database_subnet
-        purpose: "database"
+        name: private
+        purpose: "private_only"
 
   vpc:
     cidr_block: 
