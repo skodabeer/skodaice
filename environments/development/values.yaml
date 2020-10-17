@@ -13,7 +13,7 @@ values:
       region: "{{ global_values.region }}"
       tags:
         deployment_language: "ansible"
-        name: webserver
+        Name: webserver
         purpose: "any"
 
   elbs:

@@ -30,6 +30,20 @@
     var: subnet_results
     verbosity: 1
 
+- name: "Get public subnet info"
+  ec2_vpc_subnet_info:
+    filters:
+      "tag:name": "public"
+    region: "{{ global_values.region }}"
+  register: public_subnet_info
+
+- name: "Get private subnet info"
+  ec2_vpc_subnet_info:
+    filters:
+      "tag:name": "private"
+    region: "{{ global_values.region }}"
+  register: private_subnet_info
+
 - name: "Create Security Group"
   ec2_group:
     description: "{{ item.description }}"
@@ -57,5 +71,40 @@
     state: present
   register: igw_results
 
-#TODO associate the igw to the route table to make the web subnet public
+- name: Debug IGW at v 1
+  debug:
+    var: igw_results
+    verbosity: 1
+
+- name: Set up public subnet route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_results.vpc.id }}"
+    region: "{{ global_values.region }}"
+    tags:
+      Name: "public route table"
+    subnets:
+      - "{{ public_subnet_info.subnets[0].id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw_results.gateway_id }}"
+  register: public_route_table
+
+- name: "Create an ELB for http requests"
+  local_action:
+    listeners: "{{ values.elbs.application.listeners }}"
+    module: ec2_elb_lb
+    name: "{{ values.elbs.application.name }}"
+    region: "{{ global_values.region }}"
+    state: "{{ network_state | default('present') }}"
+    subnets: "{{ public_subnet_info.subnets[0].id }}"
+    tags: "{{ values.elbs.application.tags }}"
+  register: elb_results
+
+- name: Debug elb at v 1
+  debug:
+    var: elb_results
+    verbosity: 1
+
+
+  # skodaice.com.s3-website-us-east-1.amazonaws.com
     
